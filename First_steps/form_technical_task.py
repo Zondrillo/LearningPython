@@ -57,7 +57,7 @@ def make_head(ws):
     merge_format3.set_align('vcenter')
     rotate = final_wb.add_format({'rotation': 90, 'align': 'center', 'border': 1, 'font': 'Tahoma', 'font_size': 16})
     rotate.set_align('vcenter')
-    ws.set_column('A:A', 4.5)
+    ws.set_column('A:A', 6)
     ws.set_column('B:C', 13.5)
     ws.set_column('D:D', 43)
     ws.set_column('E:E', 54)
@@ -266,26 +266,26 @@ if __name__ == "__main__":
     data_pt = pd.pivot_table(data, index=['Раздел_ГКПЗ', 'Завод', 'Номер лота', '№ материала', 'Краткий текст позиции',
                                           'ЕИ'], values=['Количество'], columns=['Дата поставки'],
                              aggfunc=np.sum).sort_values(by=['Краткий текст позиции'])
-    tables_repairs = pivot(factories, budgets[0])
-    tables_exploitation = pivot(factories, budgets[1])
-    tables_investments = pivot(factories, budgets[2])
-    tables_exploitation[0].to_excel('temp.xlsx', merge_cells=False)
-    temp_wb = load_workbook(filename='temp.xlsx', data_only=True, read_only=True)
-    temp_ws = temp_wb.active
-    factory_id = temp_ws['B2'].value
-    budget_name = temp_ws['A2'].value
-    with xl.Workbook(f'TZ_{factory_id}_{budget_name}.xlsx') as final_wb:
-        final_ws = final_wb.add_worksheet(f'{factory_id}')
-        final_ws.set_landscape()
-        final_ws.set_paper(9)
-        final_ws.fit_to_pages(1, 0)
-        final_ws.set_zoom(60)
-        make_head(final_ws)
-        add_big_table(big_table(temp_ws), final_ws)
-        curr_row_num = consignee(factory_id, len(big_table(temp_ws)), final_ws)
-        total(factory_id, final_ws, curr_row_num[0], curr_row_num[1])
-        row_for_sign = make_tail(final_ws, factory_id, curr_row_num[0] + 3)
-        signatory(final_ws, factory_id, row_for_sign)
-    temp_wb.close()
+    tables = [pivot(factories, budgets[0]), pivot(factories, budgets[1]), pivot(factories, budgets[2])]
+    for table in tables:
+        for pivots in table:
+            pivots.to_excel('temp.xlsx', merge_cells=False)
+            temp_wb = load_workbook(filename='temp.xlsx', data_only=True, read_only=True)
+            temp_ws = temp_wb.active
+            factory_id = temp_ws['B2'].value
+            budget_name = temp_ws['A2'].value
+            with xl.Workbook(f'ТЗ_{factory_id}_{budget_name}.xlsx') as final_wb:
+                final_ws = final_wb.add_worksheet(f'{factory_id}')
+                final_ws.set_landscape()
+                final_ws.set_paper(9)
+                final_ws.fit_to_pages(1, 0)
+                final_ws.set_zoom(60)
+                make_head(final_ws)
+                add_big_table(big_table(temp_ws), final_ws)
+                curr_row_num = consignee(factory_id, len(big_table(temp_ws)), final_ws)
+                total(factory_id, final_ws, curr_row_num[0], curr_row_num[1])
+                row_for_sign = make_tail(final_ws, factory_id, curr_row_num[0] + 3)
+                signatory(final_ws, factory_id, row_for_sign)
+            temp_wb.close()
     os.remove('temp.xlsx')
     print('Lead time: {:.2f} secs.'.format(time.time() - start))
