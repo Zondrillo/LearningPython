@@ -5,15 +5,19 @@ import os
 import tempfile as tf
 import xlsxwriter as xl
 from openpyxl import load_workbook
+from datetime import datetime
 
 
 def pivot(file_name):  # создаёт списки сводных таблиц для каждого грузополучателя, в соответствии с бюджетом
-    factories = ('7Q11', '7Q31', '7Q41', '7Q91', '7Q61', '7QB1')  # коды грузополучателей
+    factories = ('7Q11', '7Q31', '7Q41', '7Q61', '7Q91', '7QB1')  # коды грузополучателей
     budgets = ('РЕМОНТ', 'ЭКСПЛУАТАЦИЯ', 'ИП_ТПИР')  # перечень статей бюджета
     crs = {'ЦРС ННовг Цех': '7Q11', 'ЦРС Кстово Цехов': '7Q31', 'ЦРС Дзержинск Цехов': '7Q41',  # Наименования МВЗ
            'НжФ ЦРС ТСКстово Цех': '7Q61', 'НжФ ЦРС ТСДзер Цех': '7QB1'}
-    year_month = ('2019/12', '2020/01', '2020/02', '2020/03', '2020/04', '2020/05', '2020/06', '2020/07', '2020/08',
-                  '2020/09', '2020/10', '2020/11', '2020/12')  # годы/месяцы поставки
+    curr_year = datetime.now().year
+    next_year = curr_year + 1
+    year_month = (f'{curr_year}/12', f'{next_year}/01', f'{next_year}/02', f'{next_year}/03', f'{next_year}/04',
+                  f'{next_year}05', f'{next_year}/06', f'{next_year}/07', f'{next_year}/08', f'{next_year}/09',
+                  f'{next_year}/10', f'{next_year}/11', f'{next_year}/12')  # годы/месяцы поставки
     data = pd.read_excel(file_name, sheet_name='Sheet1')
     data['Дата поставки'] = data['Дата поставки'].dt.strftime('%Y/%m')  # преобразование дат в формат ГГГГ/ММ
     data.rename(columns={'Раздел ГКПЗ': 'Раздел_ГКПЗ'}, inplace=True)
