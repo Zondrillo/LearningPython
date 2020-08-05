@@ -14,11 +14,12 @@ factories = ('7Q11', '7Q31', '7Q41', '7Q61', '7Q91', '7QB1')  # коды гру�
 def pivot(file_name):  # создаёт списки сводных таблиц для каждого грузополучателя, в соответствии с бюджетом
     budgets = ('РЕМОНТ', 'ЭКСПЛУАТАЦИЯ', 'ИП_ТПИР')  # перечень статей бюджета
     crs = {'ЦРС ННовг Цех': '7Q11', 'ЦРС Кстово Цехов': '7Q31', 'ЦРС Дзержинск Цехов': '7Q41',  # Наименования МВЗ
-           'НжФ ЦРС ТСКстово Цех': '7Q61', 'НжФ ЦРС ТСДзер Цех': '7QB1'}
+           'ЦРС Дзержинск РемРас': '7Q41', 'НжФ ЦРС ТСКстово Цех': '7Q61', 'НжФЦРСТСКстовРемРасх': '7Q61',
+           'НжФ ЦРС ТСДзер Цех': '7QB1', 'НжФЦРС ТСДзерРемРасх': '7QB1'}
     curr_year = datetime.now().year
     next_year = curr_year + 1
     year_month = (f'{curr_year}/12', f'{next_year}/01', f'{next_year}/02', f'{next_year}/03', f'{next_year}/04',
-                  f'{next_year}05', f'{next_year}/06', f'{next_year}/07', f'{next_year}/08', f'{next_year}/09',
+                  f'{next_year}/05', f'{next_year}/06', f'{next_year}/07', f'{next_year}/08', f'{next_year}/09',
                   f'{next_year}/10', f'{next_year}/11', f'{next_year}/12')  # годы/месяцы поставки
     data = pd.read_excel(file_name, sheet_name='Sheet1')
     data['Дата поставки'] = data['Дата поставки'].dt.strftime('%Y/%m')  # преобразование дат в формат ГГГГ/ММ
@@ -137,7 +138,15 @@ class FormTechTaskComm:
         x = 0
         y = 6
         while y <= 19:
-            if len(self.some_list) == 5:
+            if len(self.some_list) == 6:
+                self.final_ws.write_formula(r_num - 1, y, f'={cells[x]}{8 + self.some_list[0]}+'
+                                                          f'{cells[x]}{8 + self.some_list[0] + self.some_list[1] + 1}+'
+                                                          f'{cells[x]}{8 + self.some_list[0] + self.some_list[1] + self.some_list[2] + 2}+'
+                                                          f'{cells[x]}{8 + self.some_list[0] + self.some_list[1] + self.some_list[2] + self.some_list[3] + 3}+'
+                                                          f'{cells[x]}{8 + self.some_list[0] + self.some_list[1] + self.some_list[2] + self.some_list[3] + self.some_list[4] + 4}+'
+                                                          f'{cells[x]}{8 + self.some_list[0] + self.some_list[1] + self.some_list[2] + self.some_list[3] + self.some_list[4] + self.some_list[5] + 5}',
+                                            format_total_num)
+            elif len(self.some_list) == 5:
                 self.final_ws.write_formula(r_num - 1, y, f'={cells[x]}{8 + self.some_list[0]}+'
                                                           f'{cells[x]}{8 + self.some_list[0] + self.some_list[1] + 1}+'
                                                           f'{cells[x]}{8 + self.some_list[0] + self.some_list[1] + self.some_list[2] + 2}+'
@@ -228,7 +237,15 @@ class FormTechTaskComm:
                                   'перегрузке, хранении, согласно ГОСТ, ТУ, ОСТ. Тара (упаковка) возврату не подлежит.'
                                   '\nОсобые требования к упаковке: нет.', merge_format3)
         self.final_ws.set_row(row_num + 1, 60)
-        if len(factory_id) == 5:
+        if len(factory_id) == 6:
+            self.final_ws.merge_range(f'E{row_num + 3}:U{row_num + 3}',
+                                      'Поставка осуществляется путем отгрузок продукции автомобильным транспортом силами'
+                                      ' и за счет Поставщика до склада Грузополучателя по адресу:\n'
+                                      f'{self.addresses[factory_id[0]]}\n{self.addresses[factory_id[1]]}\n'
+                                      f'{self.addresses[factory_id[2]]}\n{self.addresses[factory_id[3]]}\n'
+                                      f'{self.addresses[factory_id[4]]}\n{self.addresses[factory_id[5]]}', merge_format3)
+            self.final_ws.set_row(row_num + 2, 146)
+        elif len(factory_id) == 5:
             self.final_ws.merge_range(f'E{row_num + 3}:U{row_num + 3}',
                                       'Поставка осуществляется путем отгрузок продукции автомобильным транспортом силами'
                                       ' и за счет Поставщика до склада Грузополучателя по адресу:\n'
